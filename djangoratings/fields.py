@@ -185,7 +185,6 @@ class RatingManager(object):
                     filter_kwargs['date_added__gte'] = minimum_time
                     filter_kwargs['date_changed__gte'] = minimum_time
 
-                print filter_kwargs
                 num_votes = Vote.objects.filter(**filter_kwargs).count()
                 if num_votes >= getattr(settings, 'RATINGS_VOTES_PER_IP', RATINGS_VOTES_PER_IP):
                     raise IPLimitReached()
