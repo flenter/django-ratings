@@ -152,7 +152,9 @@ Limit Votes Per IP Address
 
 	RATINGS_VOTES_PER_IP = 3
 
+
 There is also a new setting ``RATINGS_VOTES_PER_IP_DURATION``, to limit the search for unique IPs per object/rating-filed to a certain time frame. Default setting is 0 and results in no additional filtering::
+
     RATINGS_VOTES_PER_IP_DURATION = 3600
 
 =============
