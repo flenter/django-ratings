@@ -67,7 +67,8 @@ class AddRatingView(object):
             if 'deleted' in adds:
                 response.delete_cookie(cookie_name)
             else:
-                response.set_cookie(cookie_name, cookie, 31536000, path='/') # TODO: move cookie max_age to settings
+                from django.conf import settings
+                response.set_cookie(cookie_name, cookie, getattr(settings, 'RATINGS_VOTES_PER_IP_DURATION', 31536000), path='/')
         return response
     
     def rating_added_response(self, request, context, adds={}):
@@ -77,7 +78,8 @@ class AddRatingView(object):
             if 'deleted' in adds:
                 response.delete_cookie(cookie_name)
             else:
-                response.set_cookie(cookie_name, cookie, 31536000, path='/') # TODO: move cookie max_age to settings
+                from django.conf import settings
+                response.set_cookie(cookie_name, cookie, getattr(settings, 'RATINGS_VOTES_PER_IP_DURATION', 31536000), path='/') # TODO: move cookie max_age to settings
         return response
 
     def authentication_required_response(self, request, context):

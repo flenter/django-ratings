@@ -3,10 +3,10 @@ from django.conf import settings
 
 import forms
 import itertools
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from models import Vote, Score
-from default_settings import RATINGS_VOTES_PER_IP
+from default_settings import RATINGS_VOTES_PER_IP, RATINGS_VOTES_PER_IP_DURATION
 from exceptions import *
 
 if 'django.contrib.contenttypes' not in settings.INSTALLED_APPS:
@@ -173,12 +173,20 @@ class RatingManager(object):
             if delete:
                 raise CannotDeleteVote("attempt to find and delete your vote for %s is failed" % (self.field.name,))
             if getattr(settings, 'RATINGS_VOTES_PER_IP', RATINGS_VOTES_PER_IP):
-                num_votes = Vote.objects.filter(
-                    content_type=kwargs['content_type'],
-                    object_id=kwargs['object_id'],
-                    key=kwargs['key'],
-                    ip_address=ip_address,
-                ).count()
+
+                filter_kwargs = {
+                        'content_type':kwargs['content_type'],
+                        'object_id':kwargs['object_id'],
+                        'key':kwargs['key'],
+                        'ip_address':ip_address,
+                        }
+                if getattr(settings, 'RATINGS_VOTES_PER_IP_DURATION', RATINGS_VOTES_PER_IP_DURATION):
+                    minimum_time = datetime.now() - timedelta(seconds = getattr(settings, 'RATINGS_VOTES_PER_IP_DURATION', 0))
+                    filter_kwargs['date_added__gte'] = minimum_time
+                    filter_kwargs['date_changed__gte'] = minimum_time
+
+                print filter_kwargs
+                num_votes = Vote.objects.filter(**filter_kwargs).count()
                 if num_votes >= getattr(settings, 'RATINGS_VOTES_PER_IP', RATINGS_VOTES_PER_IP):
                     raise IPLimitReached()
             kwargs.update(defaults)
