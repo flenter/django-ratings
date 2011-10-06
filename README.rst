@@ -141,7 +141,7 @@ COOKIE format
 
 Example: vote-15.56.2c5504=20101213101523456000 
 
-And this COOKIE lives in user's browser for 1 year (this period is also fixed for now)
+And this COOKIE lives in user's browser for 1 year or to the same duration as the new RATING_VOTES_PER_IP_DURATION value
 
 *This feature may change in the future*
 
