@@ -118,6 +118,44 @@ class RatingManager(object):
         except Vote.DoesNotExist:
             pass
         return
+
+    def get_known_vote_count_for_user(self, user, ip_address=None, cookies={}):
+        kwargs = dict(
+            content_type    = self.get_content_type(),
+            #object_id       = self.instance.pk,
+            key             = self.field.key,
+        )
+
+        if not (user and user.is_authenticated()):
+            if not ip_address:
+                raise ValueError('``user`` or ``ip_address`` must be present.')
+            kwargs['user__isnull'] = True
+            kwargs['ip_address'] = ip_address
+        else:
+            kwargs['user'] = user
+
+        from django.conf import settings
+
+        duration = getattr(settings, 'RATINGS_VOTES_PER_IP_DURATION', RATINGS_VOTES_PER_IP_DURATION)
+
+        if duration:
+            kwargs['date_changed__gte'] = datetime.now() - timedelta(seconds=duration)
+
+        use_cookies = (self.field.allow_anonymous and self.field.use_cookies)
+        if use_cookies:
+            # TODO: move 'vote-%d.%d.%s' to settings or something
+            detected_cookies = []
+            for key in cookies.keys():
+                if key.startswith('vote-%d.' % kwargs['content_type'].pk) and key.endswith('%s' % kwargs['key'][:6],):
+                    detected_cookies.append(cookies.get(key))
+
+            if len(detected_cookies):
+                kwargs['cookie__in'] = detected_cookies
+            else:
+                kwargs['cookie__isnull'] = False
+
+        votes = Vote.objects.filter(**kwargs).count
+        return votes
         
     def add(self, score, user, ip_address, cookies={}, commit=True):
         """add(score, user, ip_address)
