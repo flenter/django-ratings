@@ -154,7 +154,7 @@ class RatingManager(object):
             else:
                 kwargs['cookie__isnull'] = False
 
-        votes = Vote.objects.filter(**kwargs).count
+        votes = Vote.objects.filter(**kwargs).count()
         return votes
         
     def add(self, score, user, ip_address, cookies={}, commit=True):
