@@ -142,6 +142,7 @@ class RatingManager(object):
             kwargs['date_changed__gte'] = datetime.now() - timedelta(seconds=duration)
 
         use_cookies = (self.field.allow_anonymous and self.field.use_cookies)
+
         if use_cookies:
             # TODO: move 'vote-%d.%d.%s' to settings or something
             detected_cookies = []
@@ -155,6 +156,10 @@ class RatingManager(object):
                 kwargs['cookie__isnull'] = False
 
         votes = Vote.objects.filter(**kwargs).count()
+	print getattr(settings, 'RATINGS_VOTES_PER_IP', RATINGS_VOTES_PER_IP)
+        if kwargs.has_key('cookie__isnull') and votes < getattr(settings, 'RATINGS_VOTES_PER_IP', RATINGS_VOTES_PER_IP):
+           votes = 0
+        print votes, kwargs
         return votes
         
     def add(self, score, user, ip_address, cookies={}, commit=True):
